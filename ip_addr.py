@@ -2,12 +2,19 @@ import subprocess
 import json 
 
 def get_ip_addr():
+
+    '''function for returning interfaces and their respective IP addresses'''
+
+    print("\n\n--- NETWORK INFO ---")
     ip_return = subprocess.run(["ip","-j","addr"], text=True, capture_output=True)
     ip_json = json.loads(ip_return.stdout)
 
     iter_JSON(ip_json)
 
 def iter_JSON(json_file):
+    
+    '''Function for iterating over json input from ip -j addr call'''
+
     for interface in json_file:
 
         print(f"\n\nInterface {interface.get("ifindex")}:")
@@ -39,7 +46,7 @@ def get_IPs(addr_info, proto = 4):
             dynamic = ip.get("dynamic")
 
             if prefix:
-                ip_addrs.append(address + f"/{prefix} --- " + "dynamic" if dynamic else "")
+                ip_addrs.append(address + f"/{prefix} --- " + "dynamic" if dynamic else address + f"/{prefix}")
             else:
                 ip_addrs.append(ip.get("local"))
         if proto == 6 and ip.get("family") == "inet6":
