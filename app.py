@@ -1,10 +1,10 @@
 import ip_addr as ip
-import cpu
+import tui
 
 def main():
     ip.get_ip_addr()
     ip.get_DNS()
-    #cpu.get_cpu_info()
+    tui.runTUI()
 
 if __name__ == "__main__":
     main()
