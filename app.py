@@ -3,7 +3,8 @@ import cpu
 
 def main():
     ip.get_ip_addr()
-    cpu.get_cpu_info()
+    ip.get_DNS()
+    #cpu.get_cpu_info()
 
 if __name__ == "__main__":
     main()

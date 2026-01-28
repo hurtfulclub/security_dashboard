@@ -13,7 +13,9 @@ def get_ip_addr():
 
 def iter_JSON(json_file):
     
-    '''Function for iterating over json input from ip -j addr call'''
+    '''Function for iterating over json input from ip -j addr call as well as grabbing DNS servers per int'''
+
+    dns_per_int = get_DNS()
 
     for interface in json_file:
 
@@ -34,6 +36,13 @@ def iter_JSON(json_file):
             print(f"\n\tIPV6:")
             for ip in ipv6_list:
                 print("\t" * 2 + ip)
+        
+        link_name = "Link " + str(interface.get("ifindex")) + f" ({interface.get("ifname")})"
+
+        if link_name in dns_per_int:
+            print(f"\n\tDNS:")
+            wordlist = dns_per_int[link_name].split()
+            print("\t" * 2 + wordlist[-1])
     
 def get_IPs(addr_info, proto = 4):
     ip_addrs = []
@@ -59,3 +68,17 @@ def get_IPs(addr_info, proto = 4):
                 ip_addrs.append(ip.get("local"))
         
     return ip_addrs
+
+def get_DNS():
+    dns_info = subprocess.run(["resolvectl", "status"], text=True, capture_output=True)
+    dns_info_out = dns_info.stdout
+    interface = "Default"
+    dns_int = {}
+
+    for line in dns_info_out.splitlines():
+        if "Current DNS Server" in line:
+            dns_int[interface] = line
+        elif line.startswith(("Link","Global")):
+            interface = line
+
+    return dns_int

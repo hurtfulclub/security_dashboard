@@ -39,11 +39,17 @@ def get_cpu_usage():
         if not usage:
             print("no cpu usage read")
         else:
-            sleep(0.5)
-            usage = psutil.cpu_percent()
-            print(f"\tCPU utilization: {usage}%")
+            for i in range(5):
+                sleep(0.5)
+                usage = psutil.cpu_percent()
+                print(f"\tCPU utilization: {usage}%")
 
 def get_process_cpu_util():
     highest_util = [None] * 5
-    for proc in psutil.process_iter(['name','pid','cpu_percent']):
-        print(proc.info)
+    for i in range(25):
+        for proc in psutil.process_iter(['name','cpu_percent']):
+            if proc.info.get('cpu_percent') > 0:
+                print(proc.info)
+        print("-------------------")
+        sleep(2)
+        
