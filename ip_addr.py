@@ -5,11 +5,10 @@ def get_ip_addr():
 
     '''function for returning interfaces and their respective IP addresses'''
 
-    print("\n\n--- NETWORK INFO ---")
     ip_return = subprocess.run(["ip","-j","addr"], text=True, capture_output=True)
     ip_json = json.loads(ip_return.stdout)
 
-    iter_JSON(ip_json)
+    return iter_JSON(ip_json)
 
 def iter_JSON(json_file):
     
@@ -17,32 +16,39 @@ def iter_JSON(json_file):
 
     dns_per_int = get_DNS()
 
+    interfaces_output = {}
+
     for interface in json_file:
 
-        print(f"\n\nInterface {interface.get("ifindex")}:")
-        print("-" * 20)
-        print("\tName:" + "\n" + "\t" * 2 + interface.get("ifname"))
+        interface_name = f"Interface {interface.get("ifindex")}"
+        interface_info = f"\n\tName: {interface.get("ifname")}"
 
         ipv4_list = get_IPs(interface.get("addr_info"),proto=4)
         ipv6_list = get_IPs(interface.get("addr_info"),proto=6)
         
 
         if ipv4_list:
-            print(f"\n\tIPV4:")
+            interface_info += f"\n\tIPV4:"
             for ip in ipv4_list:
-                print("\t" * 2 + ip)
-        
+                interface_info += f"\n\t\t{ip}"
+
         if ipv6_list:
-            print(f"\n\tIPV6:")
+            interface_info += f"\n\tIPV6:"
             for ip in ipv6_list:
-                print("\t" * 2 + ip)
-        
-        link_name = "Link " + str(interface.get("ifindex")) + f" ({interface.get("ifname")})"
+                interface_info += f"\n\t\t{ip}"
+
+        link_name = "Link " + str(interface.get("ifindex")) + f" ({interface.get("ifname")})"  
 
         if link_name in dns_per_int:
-            print(f"\n\tDNS:")
+            interface_info += f"\n\tDNS:"
             wordlist = dns_per_int[link_name].split()
-            print("\t" * 2 + wordlist[-1])
+            interface_info += f"\n\t\t{wordlist[-1]}"
+
+        ip_info = {interface_name: interface_info} 
+
+        interfaces_output.update(ip_info)
+    
+    return interfaces_output
     
 def get_IPs(addr_info, proto = 4):
     ip_addrs = []
