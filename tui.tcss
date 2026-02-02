@@ -12,7 +12,8 @@ Tui {
 
 #bottomcontainer {
     height: 35%;
-    width: 100%
+    width: 100%;
+    border: heavy rgba(0,0,0,1);
 }
 
 
@@ -23,6 +24,7 @@ Tui {
     scrollbar-color: rgba(50, 48, 58, 1);
     scrollbar-color-hover: rgba(131, 121, 160, 1);
     scrollbar-color-active: rgba(118, 102, 167, 1);
+    scrollbar-size-vertical: 1;
     
 }
 
@@ -30,13 +32,13 @@ Tui {
     min-height: 1;
 }
 
-.red{
+.dark{
     background: rgba(40, 38, 44, 1) 20%;
     padding: 1;
     min-height: 1;
 }
 
-.blue{
+.light{
     background: rgba(86, 85, 92, 1) 20%;
     padding: 1;
     min-height: 1;
@@ -49,4 +51,9 @@ Tui {
 
 .button_right {
     width: 100%;
+}
+
+#terminaloutput{
+    width: 100%;
+    scrollbar-size: 0 0;
 }
