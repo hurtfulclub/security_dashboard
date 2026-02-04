@@ -1,14 +1,46 @@
 from textual import on, work
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, ItemGrid, VerticalScroll, VerticalGroup
+from textual.containers import Container, Horizontal, ItemGrid, VerticalScroll, VerticalGroup,Vertical
 from textual.screen import Screen
-from textual.widgets import Button, Header, Footer, Static, Placeholder, Log
+from textual.widgets import Button, Header, Footer, Static, Placeholder, Log, Input
 
-from tui_functions import ping8888, trace8888, pinggoogle
+from tui_functions import ping8888, trace8888, pinggoogle, pingcustom, tracecustom
 
 class ScreenCustomPing(Screen):
     def compose(self) -> ComposeResult:
-        yield Log("this is a test")
+        yield Vertical(
+            Container(
+                Horizontal(
+                    Input("Address", classes="ipinput", id="ipaddr"),
+                    classes="ipinput"
+                ),
+                Horizontal(
+                    Button("Back", id="backbutton"),
+                    Button("Ping", id="submitpingbutton"),
+                    classes="centerbuttons"
+                ),
+                    id="custompingwindow"
+            ),
+            classes="maininput"
+        )
+
+class ScreenCustomTrace(Screen):
+    def compose(self) -> ComposeResult:
+        yield Vertical(
+            Container(
+                Horizontal(
+                    Input("Address", classes="ipinput", id="userip"),
+                    classes="ipinput"
+                ),
+                Horizontal(
+                    Button("Back", id="backbutton"),
+                    Button("Trace", id="submitpingbutton"),
+                    classes="centerbuttons"
+                ),
+                    id="custompingwindow"
+            ),
+            classes="maininput"
+        )
 
 class SecurityApp(App):
 
@@ -39,6 +71,16 @@ class SecurityApp(App):
     def run_google (self, container):
         for line in pinggoogle():
             self.call_from_thread(self.add_log_line, line, container)
+    
+    @work(thread=True)
+    def run_customping(self, container, address):
+        for line in pingcustom(address):
+            self.call_from_thread(self.add_log_line, line, container)
+
+    @work(thread=True)
+    def run_customtrace(self, container, address):
+        for line in tracecustom(address):
+            self.call_from_thread(self.add_log_line, line, container)
 
     async def add_log_line(self, line, container):
         container.write(line+"\n")
@@ -57,7 +99,7 @@ class SecurityApp(App):
                 Button("trace 8.8.8.8", classes="button_right", id="trace8"),
                 Button("ping google", classes="button_right", id="pinggoogle"),
                 Button("custom ping", classes="button_right", id="customping"),
-                Button("custom trace", classes="button_right"),
+                Button("custom trace", classes="button_right", id="customtrace"),
                 id="buttongrid"
             ),
             id="topcontainer")
@@ -82,6 +124,26 @@ class SecurityApp(App):
     def customping(self):
         self.push_screen(ScreenCustomPing())
 
+    @on(Button.Pressed, "#customtrace")
+    def customtrace(self):
+        self.push_screen(ScreenCustomTrace())
+
+    @on(Button.Pressed, "#backbutton")
+    def back(self, event: Button.Pressed) -> None:
+        self.pop_screen()
+
+    @on(Button.Pressed, "#submitpingbutton")
+    def pingaddress(self):
+        input = self.app.screen.query_one("#ipaddr")
+        self.pop_screen()
+        self.run_customping(self.pingoutput, input.value)
+
+    @on(Button.Pressed, "#submitpingbutton")
+    def pingaddress(self):
+        input = self.app.screen.query_one("#userip")
+        self.pop_screen()
+        self.run_customtrace(self.pingoutput, input.value)
+        
     def on_mount(self):
 
         #adds inteface containers based on how many interfaces are present on device
