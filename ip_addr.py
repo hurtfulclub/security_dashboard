@@ -1,19 +1,20 @@
 import subprocess
 import json 
 
-def get_ip_addr():
+#function for returning interfaces and their respective IP addresses
 
-    '''function for returning interfaces and their respective IP addresses'''
+def get_ip_addr():
 
     ip_return = subprocess.run(["ip","-j","addr"], text=True, capture_output=True)
     ip_json = json.loads(ip_return.stdout)
 
     return iter_JSON(ip_json)
 
+
+#Function for iterating over json input from ip -j addr call as well as grabbing DNS servers per int
+
 def iter_JSON(json_file):
     
-    '''Function for iterating over json input from ip -j addr call as well as grabbing DNS servers per int'''
-
     dns_per_int = get_DNS()
 
     interfaces_output = {}
@@ -49,7 +50,9 @@ def iter_JSON(json_file):
         interfaces_output.update(ip_info)
     
     return interfaces_output
-    
+
+#function to get the ips from command line output
+  
 def get_IPs(addr_info, proto = 4):
     ip_addrs = []
 
@@ -74,6 +77,9 @@ def get_IPs(addr_info, proto = 4):
                 ip_addrs.append(ip.get("local"))
         
     return ip_addrs
+
+
+#function to get dns info from command line output
 
 def get_DNS():
     dns_info = subprocess.run(["resolvectl", "status"], text=True, capture_output=True)

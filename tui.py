@@ -4,43 +4,16 @@ from textual.containers import Container, Horizontal, ItemGrid, VerticalScroll, 
 from textual.screen import Screen
 from textual.widgets import Button, Header, Footer, Static, Placeholder, Log, Input
 
-from tui_functions import ping8888, trace8888, pinggoogle, pingcustom, tracecustom
+from tui_functions import pingcustom, tracecustom
 
-class ScreenCustomPing(Screen):
-    def compose(self) -> ComposeResult:
-        yield Vertical(
-            Container(
-                Horizontal(
-                    Input("Address", classes="ipinput", id="ipaddr"),
-                    classes="ipinput"
-                ),
-                Horizontal(
-                    Button("Back", id="backbutton"),
-                    Button("Ping", id="submitpingbutton"),
-                    classes="centerbuttons"
-                ),
-                    id="custompingwindow"
-            ),
-            classes="maininput"
-        )
+# function to spawn the TUI
 
-class ScreenCustomTrace(Screen):
-    def compose(self) -> ComposeResult:
-        yield Vertical(
-            Container(
-                Horizontal(
-                    Input("Address", classes="ipinput", id="userip"),
-                    classes="ipinput"
-                ),
-                Horizontal(
-                    Button("Back", id="backbutton"),
-                    Button("Trace", id="submitpingbutton"),
-                    classes="centerbuttons"
-                ),
-                    id="custompingwindow"
-            ),
-            classes="maininput"
-        )
+def runTUI(ip_info):
+    app = SecurityApp(ip_info=ip_info)
+    app.run()
+
+
+#Main App logic
 
 class SecurityApp(App):
 
@@ -52,26 +25,8 @@ class SecurityApp(App):
     TITLE="Network Security"
     SUB_TITLE="v0.1"
 
-    SCREENS = {
-        "ping": ScreenCustomPing,
-    }
+    # worker threads for displaying text to log
 
-
-    @work(thread=True)
-    def run_ping(self, container):
-        for line in ping8888():
-            self.call_from_thread(self.add_log_line, line, container)
-
-    @work(thread=True)
-    def run_trace (self, container):
-        for line in trace8888():
-            self.call_from_thread(self.add_log_line, line, container)
-
-    @work(thread=True)
-    def run_google (self, container):
-        for line in pinggoogle():
-            self.call_from_thread(self.add_log_line, line, container)
-    
     @work(thread=True)
     def run_customping(self, container, address):
         for line in pingcustom(address):
@@ -84,6 +39,9 @@ class SecurityApp(App):
 
     async def add_log_line(self, line, container):
         container.write(line+"\n")
+
+
+    # logic for display
 
     def compose(self) -> ComposeResult:
 
@@ -108,17 +66,19 @@ class SecurityApp(App):
             self.pingoutput,
             id="bottomcontainer")
 
+    # button press reactions
+
     @on(Button.Pressed, "#ping8")
     def ping8888(self):
-        self.run_ping(self.pingoutput)
+        self.run_customping(self.pingoutput, "8.8.8.8")
 
     @on(Button.Pressed, "#trace8")
     def trace8888(self):
-        self.run_trace(self.pingoutput)
+        self.run_customtrace(self.pingoutput, "8.8.8.8")
 
     @on(Button.Pressed, "#pinggoogle")
     def pinggoogle(self):
-        self.run_google(self.pingoutput)
+        self.run_customping(self.pingoutput, "google.com")
 
     @on(Button.Pressed, "#customping")
     def customping(self):
@@ -138,8 +98,8 @@ class SecurityApp(App):
         self.pop_screen()
         self.run_customping(self.pingoutput, input.value)
 
-    @on(Button.Pressed, "#submitpingbutton")
-    def pingaddress(self):
+    @on(Button.Pressed, "#submittracebutton")
+    def traceaddress(self):
         input = self.app.screen.query_one("#userip")
         self.pop_screen()
         self.run_customtrace(self.pingoutput, input.value)
@@ -169,6 +129,43 @@ class SecurityApp(App):
             color_index *= -1
 
         
-def runTUI(ip_info):
-    app = SecurityApp(ip_info=ip_info)
-    app.run()
+#Screen that opens when the custom ping button is clicked
+
+class ScreenCustomPing(Screen):
+    def compose(self) -> ComposeResult:
+        yield Vertical(
+            Container(
+                Horizontal(
+                    Input("Address", classes="ipinput", id="ipaddr"),
+                    classes="ipinput"
+                ),
+                Horizontal(
+                    Button("Back", id="backbutton"),
+                    Button("Ping", id="submitpingbutton"),
+                    classes="centerbuttons"
+                ),
+                    id="custompingwindow"
+            ),
+            classes="maininput"
+        )
+        
+
+#Screen that opwns when custom trace is clicked
+
+class ScreenCustomTrace(Screen):
+    def compose(self) -> ComposeResult:
+        yield Vertical(
+            Container(
+                Horizontal(
+                    Input("Address", classes="ipinput", id="userip"),
+                    classes="ipinput"
+                ),
+                Horizontal(
+                    Button("Back", id="backbutton"),
+                    Button("Trace", id="submittracebutton"),
+                    classes="centerbuttons"
+                ),
+                    id="custompingwindow"
+            ),
+            classes="maininput"
+        )
